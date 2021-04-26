@@ -24,56 +24,43 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  bool _isFirstTap = true;
   Timer? _timer;
-  int _timeElapsed = 0;
-  bool _timerStarted = false;
-  bool _isFirstPress = true;
+  Stopwatch _stopwatch = Stopwatch();
 
   void _tapDown() {
-    if (_isFirstPress) {
-      setState(() {
-        _timeElapsed = 0;
-      });
+    if (_isFirstTap) {
+      _stopwatch.reset();
     } else {
-      _stopTimer();
+      _stopwatch.stop();
     }
   }
 
   void _tapUp() {
-    if (_isFirstPress) {
+    if (_isFirstTap) {
+      _stopwatch.start();
       setState(() {
-        _startTimer();
-        _isFirstPress = false;
+        _isFirstTap = false;
       });
     } else {
       setState(() {
-        _isFirstPress = true;
+        _isFirstTap = true;
       });
     }
   }
 
-  void _startTimer() {
-    const oneMillisecond = const Duration(milliseconds: 1);
-    setState(() {
-      _timeElapsed = 0;
-      _timerStarted = true;
+  @override
+  void initState() {
+    super.initState();
+    _timer = new Timer.periodic(new Duration(milliseconds: 10), (timer) {
+      setState(() {});
     });
-    _timer = new Timer.periodic(
-      oneMillisecond,
-      (Timer timer) {
-        if (_timerStarted) {
-          setState(() {
-            _timeElapsed++;
-          });
-        }
-      },
-    );
   }
 
-  void _stopTimer() {
-    setState(() {
-      _timerStarted = false;
-    });
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -90,15 +77,9 @@ class _MainPageState extends State<MainPage> {
       },
       child: Center(
         child: Text(
-          (_timeElapsed / 100.0).toStringAsFixed(2),
+          (_stopwatch.elapsedMilliseconds / 1000.0).toStringAsFixed(2),
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
   }
 }
